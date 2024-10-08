@@ -1,6 +1,7 @@
 import { useState } from "react";
 const ImageSubmission = () => {
     const [image, setSelectedImage] = useState(null);
+    const fakeData = {"This is":"some JSON example"}
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -16,7 +17,8 @@ const ImageSubmission = () => {
         try {
             const response = await fetch('http://127.0.0.1:5000/upload', {
                 method: 'POST',
-                body: formData,
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify(fakeData),
             });
 
             if (response.ok) {

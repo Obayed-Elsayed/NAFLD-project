@@ -35,6 +35,7 @@ def home():
 
 @app.route("/upload", methods =['POST'])
 def upload_file():
+    print(request.form)
     file = request.files['file']
     print(file)
     if 'file' not in request.files:
