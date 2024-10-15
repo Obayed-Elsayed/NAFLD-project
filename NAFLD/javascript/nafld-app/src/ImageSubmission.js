@@ -1,8 +1,6 @@
 import { useState } from "react";
 const ImageSubmission = () => {
     const [image, setSelectedImage] = useState(null);
-    const fakeData = {"This is":"some JSON example"}
-
     const handleSubmit = async (event) => {
         event.preventDefault();
         console.log("SUBMITTED")
@@ -10,28 +8,58 @@ const ImageSubmission = () => {
             alert("Please select an image to upload.");
             return;
         }
-
+        console.log(image)
         const formData = new FormData();
         formData.append('file', image);
+        // formData.append('upload_preset', "default-preset");
 
         try {
+            console.log(formData);
             const response = await fetch('http://127.0.0.1:5000/upload', {
                 method: 'POST',
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify(fakeData),
+                body: formData
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Success:', data);
-            } else {
-                const errorData = await response.json();
-                console.error('Error:', errorData);
-            }
+            const result = await response.json();
+            console.log(result)
         } catch (error) {
             console.error('Error during upload:', error);
         }
     };
+
+    /*  THIS IS a FAKE DATA PING*/
+    // const fakeData = {
+    //     "userId": 1,
+    //     "id": 1,
+    //     "title": "delectus aut autem",
+    //     "completed": false
+    //   }
+
+    // const handleSubmit = async (event) => {
+    //     event.preventDefault();
+    //     console.log("SUBMITTED")
+    //     if (!image) {
+    //         alert("Please select an image to upload.");
+    //         return;
+    //     }
+
+    //     const formData = new FormData();
+    //     formData.append('file', image);
+
+    //     try {
+    //         const response = await fetch('http://127.0.0.1:5000/fake', {
+    //             method: 'POST',
+    //             headers:{"Content-Type":"application/json"},
+    //             body: JSON.stringify(fakeData),
+    //         });
+
+    //         const result = await response.json();
+    //         console.log(result)
+    //     } catch (error) {
+    //         console.error('Error during upload:', error);
+    //     }
+    // };
+
     return ( 
 
         <div className="ImageSubmission">
@@ -39,7 +67,7 @@ const ImageSubmission = () => {
                 <img
                     alt="not found"
                     width={"250px"}
-                    src={URL.createObjectURL(image[0])}
+                    src={URL.createObjectURL(image)}
                 />
             </div>}
             
@@ -50,9 +78,9 @@ const ImageSubmission = () => {
                     name="myImage"
                     // Event handler to capture file selection and update the state
                     onChange={(event) => {
-                        console.log(event.target.files);
+                        console.log("file changed");
                         // only hook the first image for now
-                        setSelectedImage(event.target.files) 
+                        setSelectedImage(event.target.files[0]) 
                     }}
                     />
 

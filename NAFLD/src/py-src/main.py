@@ -2,12 +2,13 @@
 # flask --app .\NAFLD\src\py-src\main.py run
 import os
 from flask import Flask,jsonify, request
+from datetime import datetime
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = '../../images'
+UPLOAD_FOLDER = 'C:\\Projects\\NAFLD\\NAFLD-project\\NAFLD\\Images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # Look into restricting access from other endpoints than arent localhost?
@@ -35,21 +36,22 @@ def home():
 
 @app.route("/upload", methods =['POST'])
 def upload_file():
-    print(request.form)
     file = request.files['file']
-    print(file)
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    if file and allowed_file(file.filename):
-        filename = file.filename
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
+    print(f'received: {file}')
+    if file:
+        print(f'{file.filename}_{datetime.now().minute}:{datetime.now().second}')
+        file.save(os.path.join(UPLOAD_FOLDER, f'{file.filename}_{datetime.now().minute}_{datetime.now().second}'))
         return jsonify({'message': 'File successfully uploaded'}), 200
 
-    return jsonify({'error': 'File type not allowed'}), 400
+    return jsonify({'error': 'WHY NO WORK :( '}), 400
+
+
+@app.route("/fake", methods = ['POST'])
+def upload_json():
+    data = request.get_json()
+    print(data)  # Process your data here
+    return jsonify({"message": "Data received!", "data": data}), 200
+    
 
 
 def allowed_file(filename):
