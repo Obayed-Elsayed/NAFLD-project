@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ImageSubmission from "./ImageSubmission";
+import FileUploader from "./FileUploader";
 
 function App() {
   const [data, setData] = useState({})
@@ -24,6 +25,7 @@ function App() {
       <header className="App-header">
         <h1> NAFLD prototype</h1>
         <ImageSubmission />
+        <FileUploader />
       </header>
     </div>
   );
