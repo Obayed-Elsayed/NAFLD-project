@@ -11,6 +11,8 @@ CORS(app)
 UPLOAD_FOLDER = 'C:\\Projects\\NAFLD\\NAFLD-project\\NAFLD\\Images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+upload_file_dict = {}
+
 # Look into restricting access from other endpoints than arent localhost?
 # CORS(app, resources={r"/home": {"origins": "localhost:3000"}})
 
@@ -51,31 +53,44 @@ def upload_largefile():
     chunk = request.files['file']  # 'file' is the field name used by Resumable.js
     resumable_filename = request.form['resumableFilename']  # Original file name
     resumable_chunk_number = request.form['resumableChunkNumber']  # Chunk index (1-based)
-    
-    # Create the file path for the chunks
-    chunk_folder = os.path.join(UPLOAD_FOLDER, resumable_filename)
-    os.makedirs(chunk_folder, exist_ok=True)
-    
-    # Save the chunk to the folder
-    chunk_filename = f"{resumable_filename}.part{resumable_chunk_number}"
-    chunk.save(os.path.join(chunk_folder, chunk_filename))
-    
-    # Check if all chunks have been uploaded
     total_chunks = int(request.form['resumableTotalChunks'])
-    if len(os.listdir(chunk_folder)) == total_chunks:
-        # Assemble all chunks into the final file
-        with open(os.path.join(UPLOAD_FOLDER, resumable_filename), 'wb') as final_file:
-            for i in range(1, total_chunks + 1):
-                chunk_path = os.path.join(chunk_folder, f"{resumable_filename}.part{i}")
-                with open(chunk_path, 'rb') as chunk_file:
-                    final_file.write(chunk_file.read())
-        
-        # Optionally, remove the chunk files after assembling
-        for filename in os.listdir(chunk_folder):
-            os.remove(os.path.join(chunk_folder, filename))
-        os.rmdir(chunk_folder)
+    full_file_path = os.path.join(UPLOAD_FOLDER, f'{resumable_filename}')
 
+    print(full_file_path)
+    try:
+        with open(full_file_path,'a') as chunked_file:
+            chunked_file.write(chunk)
+    except:
+        jsonify({"status": "Error writing chunk to file"}), 400
+    
+    if(resumable_chunk_number == total_chunks):
         return jsonify({"status": "File upload complete"}), 200
+
+    #                 final_file.write(chunk_file.read())
+    # # Create the file path for the chunks
+    # chunk_folder = os.path.join(UPLOAD_FOLDER, resumable_filename)
+    # os.makedirs(chunk_folder, exist_ok=True)
+    
+    # # Save the chunk to the folder
+    # chunk_filename = f"{resumable_filename}.part{resumable_chunk_number}"
+    # chunk.save(os.path.join(chunk_folder, chunk_filename))
+    
+    # # Check if all chunks have been uploaded
+    # total_chunks = int(request.form['resumableTotalChunks'])
+    # if len(os.listdir(chunk_folder)) == total_chunks:
+    #     # Assemble all chunks into the final file
+    #     with open(os.path.join(UPLOAD_FOLDER, resumable_filename), 'wb') as final_file:
+    #         for i in range(1, total_chunks + 1):
+    #             chunk_path = os.path.join(chunk_folder, f"{resumable_filename}.part{i}")
+    #             with open(chunk_path, 'rb') as chunk_file:
+    #                 final_file.write(chunk_file.read())
+        
+    #     # Optionally, remove the chunk files after assembling
+    #     for filename in os.listdir(chunk_folder):
+    #         os.remove(os.path.join(chunk_folder, filename))
+    #     os.rmdir(chunk_folder)
+
+    #     return jsonify({"status": "File upload complete"}), 200
 
     return jsonify({"status": "Chunk upload successful"}), 200
 
