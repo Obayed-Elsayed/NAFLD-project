@@ -23,7 +23,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1> NAFLD prototype</h1>
+        <h1> NAFLD Prototype</h1>
         <ImageSubmission />
         <FileUploader />
       </header>

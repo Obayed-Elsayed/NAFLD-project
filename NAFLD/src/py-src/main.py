@@ -1,3 +1,8 @@
+# pip freeze the erqs from the backend and just integrate it here
+# add new gitignores here as well from the other project
+# 
+
+
 # python -m pip install -r ./setup.txt
 # flask --app .\NAFLD\src\py-src\main.py run
 import os
