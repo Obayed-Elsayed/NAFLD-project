@@ -63,8 +63,8 @@ def upload_largefile():
 
     print(full_file_path)
     try:
-        with open(full_file_path,'a') as chunked_file:
-            chunked_file.write(chunk)
+        with open(full_file_path,'ab') as chunked_file:
+            chunked_file.write(chunk.read())
     except:
         jsonify({"status": "Error writing chunk to file"}), 400
     

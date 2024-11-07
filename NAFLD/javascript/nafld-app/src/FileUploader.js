@@ -42,9 +42,9 @@ const FileUploader = () => {
 
   // Handle form submission
   const handleSubmit = (event) => {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault(); // Prevent default form submission and page refresh
     if (filesSelected) {
-      resumableRef.current.upload(); // Start upload when form is submitted
+      resumableRef.current.upload(); 
     }
   };
 
