@@ -54,10 +54,10 @@ def upload_file():
 
 @app.route("/largefile", methods =['POST'])
 def upload_largefile():
-    # Get the file chunk from the request
-    chunk = request.files['file']  # 'file' is the field name used by Resumable.js
-    resumable_filename = request.form['resumableFilename']  # Original file name
-    resumable_chunk_number = request.form['resumableChunkNumber']  # Chunk index (1-based)
+    
+    chunk = request.files['file']  
+    resumable_filename = request.form['resumableFilename']  
+    resumable_chunk_number = request.form['resumableChunkNumber']  
     total_chunks = int(request.form['resumableTotalChunks'])
     full_file_path = os.path.join(UPLOAD_FOLDER, f'{resumable_filename}')
 
@@ -71,31 +71,7 @@ def upload_largefile():
     if(resumable_chunk_number == total_chunks):
         return jsonify({"status": "File upload complete"}), 200
 
-    #                 final_file.write(chunk_file.read())
-    # # Create the file path for the chunks
-    # chunk_folder = os.path.join(UPLOAD_FOLDER, resumable_filename)
-    # os.makedirs(chunk_folder, exist_ok=True)
-    
-    # # Save the chunk to the folder
-    # chunk_filename = f"{resumable_filename}.part{resumable_chunk_number}"
-    # chunk.save(os.path.join(chunk_folder, chunk_filename))
-    
-    # # Check if all chunks have been uploaded
-    # total_chunks = int(request.form['resumableTotalChunks'])
-    # if len(os.listdir(chunk_folder)) == total_chunks:
-    #     # Assemble all chunks into the final file
-    #     with open(os.path.join(UPLOAD_FOLDER, resumable_filename), 'wb') as final_file:
-    #         for i in range(1, total_chunks + 1):
-    #             chunk_path = os.path.join(chunk_folder, f"{resumable_filename}.part{i}")
-    #             with open(chunk_path, 'rb') as chunk_file:
-    #                 final_file.write(chunk_file.read())
-        
-    #     # Optionally, remove the chunk files after assembling
-    #     for filename in os.listdir(chunk_folder):
-    #         os.remove(os.path.join(chunk_folder, filename))
-    #     os.rmdir(chunk_folder)
 
-    #     return jsonify({"status": "File upload complete"}), 200
 
     return jsonify({"status": "Chunk upload successful"}), 200
 
