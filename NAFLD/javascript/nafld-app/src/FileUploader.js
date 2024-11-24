@@ -4,6 +4,8 @@ import Resumable from 'resumablejs';
 const FileUploader = () => {
   const resumableRef = useRef(null);
   const [filesSelected, setFilesSelected] = useState(false);
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [fileName, setFileName] = useState("");
 
   useEffect(() => {
     // Initialize Resumable.js
@@ -18,10 +20,12 @@ const FileUploader = () => {
     // Resumable.js event listeners
     resumableRef.current.on('fileAdded', (file) => {
       console.log("File added:", file);
-      setFilesSelected(true); // Enable submit button when a file is selected
+      setFilesSelected(true); 
     });
 
     resumableRef.current.on('fileSuccess', (file, message) => {
+      setFileUploaded(true);
+      setFileName(message.get('fileName'))
       console.log("File upload successful:", file);
     });
 
@@ -43,20 +47,67 @@ const FileUploader = () => {
   // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault(); // Prevent default form submission and page refresh
+    setFileUploaded(false);
     if (filesSelected) {
-      resumableRef.current.upload(); 
+      resumableRef.current.upload();
     }
   };
 
+  const downloadFile = async (filename) => {
+    try {
+      // Make a GET request to the backend with fetch
+      const response = await fetch(`http://localhost:5000/download/${filename}`, {
+        method: 'GET',
+      });
+
+      // Check if the response is successful
+      if (response.ok) {
+        // Convert the response to a Blob (binary large object)
+        const blob = await response.blob();
+
+        // Create a temporary link element to trigger the download
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);  // Set the downloaded file name
+
+        // Append the link to the body (necessary for some browsers)
+        document.body.appendChild(link);
+        link.click();  // Programmatically click the link to trigger the download
+        document.body.removeChild(link);  // Clean up the DOM after the download
+      } else {
+        throw new Error('Failed to fetch file');
+      }
+    } catch (error) {
+      console.error('Error downloading the file:', error);
+      alert('Failed to download the file');
+    }
+  };
+
+
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="file" onChange={handleFileSelect} multiple />
-      <button type="submit" disabled={!filesSelected}>
-        Upload Files
-      </button>
-    </form>
+    <div className="ImageSubmission">
+      {fileUploaded && <div className="csvDownload"> Download Result File: {fileName}
+
+        <button onClick={() => downloadFile(fileName)}>
+          Download
+        </button>
+
+      </div>}
+
+
+      <form onSubmit={handleSubmit}>
+        <input type="file" onChange={handleFileSelect} multiple />
+        <button type="submit" disabled={!filesSelected}>
+          Upload Files
+        </button>
+
+      </form>
+    </div>
+
+
   );
 }
- 
+
 export default FileUploader;
 

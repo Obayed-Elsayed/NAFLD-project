@@ -6,10 +6,14 @@
 # python -m pip install -r ./setup.txt
 # flask --app .\NAFLD\src\py-src\main.py run
 import os
-from flask import Flask,jsonify, request
+from flask import Flask,jsonify,send_file, request
 from datetime import datetime
 from flask_cors import CORS
+import sys
+import zipfile
 
+# sys.path.append("C:\\Projects\\Machine Learning\\NAFLD\\NAFLD-project\\NAFLD\\src\\py-src\\nafld.py")
+from nafld import process_all_images
 app = Flask(__name__)
 CORS(app)
 
@@ -17,6 +21,7 @@ UPLOAD_FOLDER = 'C:\\Projects\\NAFLD\\NAFLD-project\\NAFLD\\Images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 upload_file_dict = {}
+# upload_file_list = []
 
 # Look into restricting access from other endpoints than arent localhost?
 # CORS(app, resources={r"/home": {"origins": "localhost:3000"}})
@@ -100,6 +105,7 @@ def upload_largefile():
     return jsonify({"status": "Chunk upload successful"}), 200
 
 
+
 @app.route("/fake", methods = ['POST'])
 def upload_json():
     data = request.get_json()
@@ -110,6 +116,73 @@ def upload_json():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def process_file(folder_path):
+    #check if zip & extract
+    df = process_all_images(folder_path)
+
+    # send back as csv?
+
+@app.route('/download/<filename>', methods=['GET'])
+def download_file(filename):
+    if(filename not in upload_file_dict):
+        return jsonify({'error': 'File not found'}), 404
+    
+    # Extract Any zip files
+    folder_path = upload_file_dict[filename]
+    for filename in os.listdir(folder_path):
+      if filename.endswith('.zip'):  # Check if the file has a .zip extension
+          zip_file_path = os.path.join(folder_path, filename)
+          
+          # Check if the file is a valid zip file
+          if zipfile.is_zipfile(zip_file_path):
+              print(f"Found ZIP file: {filename}")
+              
+              # Extract the zip file in the same directory
+              with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+                  zip_ref.extractall(folder_path)
+              print(f"Extracted {filename} to {folder_path}")
+          else:
+              print(f"{filename} is not a valid zip file.")
+
+    csv_path = os.path.join(folder_path,'output.csv')
+    df = process_all_images(folder_path)
+    df.to_csv(csv_path, index=False)
+
+    try:
+        return send_file(csv_path, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+
+
+    
+
+@app.route("/fullFileUpload",methods = ["POST"])
+def full_file_upload():
+    chunk = request.files['file'] 
+    resumable_filename = request.form['resumableFilename']  
+
+    if resumable_filename not in upload_file_dict:
+      current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+      new_folder_path = os.path.join(UPLOAD_FOLDER, current_time)
+      upload_file_dict[resumable_filename] = new_folder_path
+      os.makedirs(new_folder_path, exist_ok=True)
+
+
+    resumable_chunk_number = request.form['resumableChunkNumber']  # Chunk index (1-based)
+    total_chunks = int(request.form['resumableTotalChunks'])
+    full_file_path = os.path.join(upload_file_dict[resumable_filename], f'{resumable_filename}')
+
+    print(full_file_path)
+    try:
+        with open(full_file_path,'ab') as chunked_file:
+            chunked_file.write(chunk.read())
+    except:
+        jsonify({"status": "Error writing chunk to file"}), 400
+    
+    if(resumable_chunk_number == total_chunks):
+        return jsonify({"status": "file upload complete", "fileName":f"{resumable_filename}"}), 200
+    
 
 
 if __name__ == "__main__":
