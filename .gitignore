@@ -2,7 +2,9 @@
 
 # react ignores
 /NAFLD/javascript/nafld-app/node_modules
-
+/NAFLD/Images/
+/NAFLD/Scripts/
+/NAFLD/share/
 
 # Python ignores
 

@@ -47,7 +47,7 @@ from IPython.display import display
 # drive.mount('/content/drive', force_remount=True)
 psr_results = []
 
-model_save_path = './Model/PCA'
+model_save_path = 'C:\\Projects\\Machine Learning\\nafld backend\\nafld_back\\Model\\PCA'
 
 data_path = './data'
 '''
@@ -73,18 +73,19 @@ fpc = model_params['fpc']
 best_m = model_params['best_m']
 
 #8f7972 -> 143,121,114
-0.560,0.474,0.447
+# 0.560,0.474,0.447
 
-# stain_matrix = np.array([[0.148, 0.722, 0.618],
-#                          [0.462, 0.602, 0.651],
-#                          [0.187, 0.523, 0.831]])
+stain_matrix = np.array([[0.148, 0.722, 0.618],
+                         [0.462, 0.602, 0.651],
+                         [0.187, 0.523, 0.831]])
 
-# stain_matrix = np.array([[0.3, 0.3, 0.3],  # Emphasizing red and some green
-#                          [0.560, 0.474, 0.447],
-#                          [0.3, 0.3, 0.3]])
-stain_matrix = np.array([[0.39, 0.39, 0.39],  # Emphasizing red and some green
+stain_matrix = np.array([[0.39, 0.39, 0.39],  
                          [0.560, 0.474, 0.447],
                          [0.29, 0.33, 0.29]])
+
+# stain_matrix = np.array([[0.3, 0.3, 0.3],  
+#                          [0.560, 0.474, 0.447],
+#                          [0.3, 0.3, 0.3]])
 
 #  [[1. 0. 0.]
 #  [0. 0. 1.]
@@ -228,7 +229,7 @@ def update_filter_image(change):
     print(f'\n {original_image_path} \n')
     original_image = cv2.imread(original_image_path)
     original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
-
+    output = widgets.Output()
     result_image_pil, total_selected_pixels, selected_ratio = fibrosis_filter(original_image)
     u, cluster_label, _ = predict_cluster_pil(result_image_pil)
     with output:
@@ -271,9 +272,9 @@ def process_images_in_folder(folder_path, predict_cluster_func):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff', 'tif')):
             image_path = os.path.join(folder_path, filename)
             u, cluster_label, percentage = predict_cluster_func(image_path)
-            results.append([filename, percentage, cluster_label,u])
+            results.append([filename, percentage, cluster_lookup_table[cluster_label.item()]])
 
-    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label','pixels'])
+    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label'])
     return df
 
 def process_images_in_folder_svs(folder_path):
@@ -300,9 +301,9 @@ def process_images_in_folder_svs(folder_path):
 
             u, cluster_label, percentage = update_filter_slide(image_folder=folder_path, file=filename,level_slider=level_slider, x_slider=x_slider,y_slider=y_slider,
                                                                window_width_slider=window_width_slider,window_height_slider=window_height_slider)
-            results.append([filename, percentage, cluster_label, u])
+            results.append([filename, percentage, cluster_label])
 
-    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label','num pixels'])
+    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label'])
     return df
 
 def process_all_images(folder_path):

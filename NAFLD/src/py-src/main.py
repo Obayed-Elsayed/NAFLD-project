@@ -15,9 +15,10 @@ import zipfile
 # sys.path.append("C:\\Projects\\Machine Learning\\NAFLD\\NAFLD-project\\NAFLD\\src\\py-src\\nafld.py")
 from nafld import process_all_images
 app = Flask(__name__)
-CORS(app)
-
-UPLOAD_FOLDER = 'C:\\Projects\\NAFLD\\NAFLD-project\\NAFLD\\Images'
+CORS(app, expose_headers=['Content-Disposition'])
+# 'C:\\Projects\\NAFLD\\NAFLD-project\\NAFLD\\Images'
+# C:\Projects\Machine Learning\NAFLD\NAFLD-project\NAFLD\Images
+UPLOAD_FOLDER = 'C:\\Projects\\Machine Learning\\NAFLD\\NAFLD-project\\NAFLD\\Images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 upload_file_dict = {}
@@ -59,6 +60,7 @@ def upload_file():
 
 @app.route("/largefile", methods =['POST'])
 def upload_largefile():
+    # print(f"\n \n \n \n   STARTING UPLOAD \n \n \n \n")
     # Get the file chunk from the request
     chunk = request.files['file']  # 'file' is the field name used by Resumable.js
     resumable_filename = request.form['resumableFilename']  # Original file name
@@ -145,11 +147,14 @@ def download_file(filename):
           else:
               print(f"{filename} is not a valid zip file.")
 
-    csv_path = os.path.join(folder_path,'output.csv')
+    csv_file_name = 'output.csv'
+    csv_path = os.path.join(folder_path,csv_file_name)
     df = process_all_images(folder_path)
     df.to_csv(csv_path, index=False)
 
     try:
+        response = send_file(csv_path, as_attachment=True)
+        response.headers["Content-Disposition"] = f"attachment; filename={csv_file_name}"
         return send_file(csv_path, as_attachment=True)
     except FileNotFoundError:
         return jsonify({'error': 'File not found'}), 404
@@ -157,21 +162,23 @@ def download_file(filename):
 
     
 
-@app.route("/fullFileUpload",methods = ["POST"])
+@app.route("/fullFileUpload", methods =['POST'])
 def full_file_upload():
     chunk = request.files['file'] 
     resumable_filename = request.form['resumableFilename']  
 
     if resumable_filename not in upload_file_dict:
+      
       current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
       new_folder_path = os.path.join(UPLOAD_FOLDER, current_time)
       upload_file_dict[resumable_filename] = new_folder_path
       os.makedirs(new_folder_path, exist_ok=True)
 
 
+
     resumable_chunk_number = request.form['resumableChunkNumber']  # Chunk index (1-based)
     total_chunks = int(request.form['resumableTotalChunks'])
-    full_file_path = os.path.join(upload_file_dict[resumable_filename], f'{resumable_filename}')
+    full_file_path = os.path.join(upload_file_dict[resumable_filename], resumable_filename)
 
     print(full_file_path)
     try:
@@ -180,8 +187,13 @@ def full_file_upload():
     except:
         jsonify({"status": "Error writing chunk to file"}), 400
     
-    if(resumable_chunk_number == total_chunks):
-        return jsonify({"status": "file upload complete", "fileName":f"{resumable_filename}"}), 200
+    if(int(resumable_chunk_number) == total_chunks):
+        print("Returned file")
+        # return jsonify({"status": {'file_status':"file upload complete","fileName":f"{resumable_filename}"}}), 200
+        return jsonify({"status": "file upload complete","fileName":f"{resumable_filename}"}), 200
+    
+    # print(f"res num: {resumable_chunk_number} total: {total_chunks}")
+    return jsonify({"status": "Chunk upload successful"}), 200
     
 
 
