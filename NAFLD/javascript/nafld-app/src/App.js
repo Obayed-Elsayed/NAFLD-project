@@ -25,11 +25,19 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1 className= "centered-header"> NAFLD Prototype</h1>
+      <header className="centered-header">
+          <img src="/Images/McMaster.png" alt="Logo Left" className="logo-left" />
+        <h1 className="centered-header">
+
+          FibroAi
+
+        </h1>
+          <img src="/Images/Heersink.png" alt="Logo Right" className="logo-right" />
         {/* <ImageSubmission /> */}
-        <FileUploader />
       </header>
+      <div>
+        <FileUploader />
+      </div>
     </div>
   );
 }

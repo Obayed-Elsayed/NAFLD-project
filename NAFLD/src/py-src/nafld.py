@@ -272,9 +272,12 @@ def process_images_in_folder(folder_path, predict_cluster_func):
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff', 'tif')):
             image_path = os.path.join(folder_path, filename)
             u, cluster_label, percentage = predict_cluster_func(image_path)
-            results.append([filename, percentage, cluster_lookup_table[cluster_label.item()]])
+            # results.append([filename, percentage, cluster_lookup_table[cluster_label.item()]])
+            results.append([filename, percentage, cluster_lookup_table[cluster_label.item()],u[0][0],u[1][0],u[2][0],u[3][0]])
+    # return results.append()
 
-    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label'])
+    df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label','None','Perisinusoidal','Bridging','Cirrosis'])
+    # df = pd.DataFrame(results, columns=['image_name', 'percentage', 'cluster_label')
     return df
 
 def process_images_in_folder_svs(folder_path):

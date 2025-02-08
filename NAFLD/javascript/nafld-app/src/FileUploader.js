@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Resumable from 'resumablejs';
 import ProgressBar from './progressBar';
+import Papa from 'papaparse';
+// import { Bar } from 'react-chartjs-2';
+// import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const FileUploader = () => {
   const resumableRef = useRef(null);
@@ -10,6 +14,16 @@ const FileUploader = () => {
   const [image, setSelectedImage] = useState(null);
   const [progress, setProgress] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  // const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  // const [parsedColumns, setParsedColumns] = useState([]);
+  // const [data, setData] = useState([
+  //   { name: 'Fruit', value: 5 },
+  //   { name: 'Vegetable', value: 4 },
+  //   { name: 'Dairy', value: 1 },
+  // ]);
+
   useEffect(() => {
     // Initialize Resumable.js
     resumableRef.current = new Resumable({
@@ -78,23 +92,33 @@ const FileUploader = () => {
 
         const disposition = response.headers.get('Content-Disposition');
         console.log(response.headers)
-        let downloadfilename = '_result.csv'; // Default filename
+        let downloadfilename = '_result.csv';
         if (disposition) {
           console.log(disposition);
           downloadfilename = disposition
             .split('filename=')[1]
-            .replace(/"/g, ''); // Extract filename and remove quotes
+            .replace(/"/g, '');
         }
         // Create a temporary link element to trigger the download
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', downloadfilename);  // Set the downloaded file name
+        link.setAttribute('download', downloadfilename);
 
         // Append the link to the body (necessary for some browsers)
         document.body.appendChild(link);
-        link.click();  // Programmatically click the link to trigger the download
-        document.body.removeChild(link);  // Clean up the DOM after the download
+        link.click();
+        document.body.removeChild(link);
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = reader.result;
+          parseCSV(text); // Pass the file content to the CSV parser
+        };
+
+        // Trigger reading of the blob as text
+        reader.readAsText(blob);
+
       } else {
         throw new Error('Failed to fetch file');
       }
@@ -104,6 +128,24 @@ const FileUploader = () => {
     }
   };
 
+  const parseCSV = (csvText) => {
+    Papa.parse(csvText, {
+      header: true, // Treat the first row as headers
+      skipEmptyLines: true,
+      complete: (result) => {
+        // Extract the data rows
+        const data = result.data.map(row => ({
+          image_name: row.image_name,  // The image name will be the title
+          None: JSON.parse(row.None),  // Parse the array values
+          Perisinusoidal: JSON.parse(row.Perisinusoidal),
+          Bridging: JSON.parse(row.Bridging),
+          Cirrosis: JSON.parse(row.Cirrosis),
+        }));
+
+        setChartData(data);
+      },
+    });
+  };
 
   return (
 
@@ -132,6 +174,48 @@ const FileUploader = () => {
         </div>
       )}
 
+      {/* <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+      <div style={{ width: '50%' }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="value" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div> */}
+
+      <div className="bar-graph-container">
+        {/* Render a bar chart for each row in the CSV */}
+        {chartData.map((row, index) => (
+          <div key={index} className="bar-graph">
+            <h2>{row.image_name}</h2> {/* Display the image name as the chart title */}
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={[
+                { name: "None", value: row.None },
+                { name: "Perisinusoidal", value: row.Perisinusoidal },
+                { name: "Bridging", value: row.Bridging },
+                { name: "Cirrosis", value: row.Cirrosis }
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" label={{ value: "Categories", position: "bottom" }} />
+                  <YAxis 
+                    domain={[0, 1]} // Set the Y-axis to range from 0 to 1
+                    label={{ value: "Confidence %", angle: -90, position: "insideLeft" }} 
+                    tickFormatter={(tick) => `${(tick * 100).toFixed(0)}%`} // Format Y values as percentages
+                  />
+                  <Tooltip formatter={(value) => `${(value * 100).toFixed(0)}%`} />
+                <Bar dataKey="value" fill="#7A003C" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ))}
+      </div>
+
 
       <div className="form-container">
         <form onSubmit={handleSubmit}>
@@ -142,7 +226,7 @@ const FileUploader = () => {
         </form>
       </div>
       {progress &&
-        <div style={{ padding: '20px 0' }}>
+        <div className='progress-bar-container'>
           <ProgressBar progress={progress}> </ProgressBar>
         </div>
       }
