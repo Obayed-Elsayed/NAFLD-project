@@ -14,15 +14,12 @@ const FileUploader = () => {
   const [image, setSelectedImage] = useState(null);
   const [progress, setProgress] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [triedSelecting, setTriedSelecting] = useState(false)
 
-  // const [chartData, setChartData] = useState([]);
+  // Handle file selection
+  const validImageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'];
   const [chartData, setChartData] = useState([]);
-  // const [parsedColumns, setParsedColumns] = useState([]);
-  // const [data, setData] = useState([
-  //   { name: 'Fruit', value: 5 },
-  //   { name: 'Vegetable', value: 4 },
-  //   { name: 'Dairy', value: 1 },
-  // ]);
+
 
   useEffect(() => {
     // Initialize Resumable.js
@@ -60,11 +57,26 @@ const FileUploader = () => {
     });
   }, []);
 
-  // Handle file selection
+
   const handleFileSelect = (event) => {
+    setTriedSelecting(true);
     const files = event.target.files;
-    setSelectedImage(files[0])
-    resumableRef.current.addFiles(files); // Add files to Resumable.js
+    const selectedFile = files[0];
+
+    if (selectedFile) {
+      // Get the file extension (in lowercase for case-insensitivity)
+      const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+
+      // Check if the file extension is in the list of valid image extensions
+      if (validImageExtensions.includes(`.${fileExtension}`)) {
+        setSelectedImage(selectedFile);
+      } else {
+        setSelectedImage(null); // Set to null if the file is not an image
+      }
+    }
+
+    // Add files to Resumable.js
+    resumableRef.current.addFiles(files);
   };
 
   // Handle form submission
@@ -151,49 +163,52 @@ const FileUploader = () => {
 
     <div className="ImageSubmission">
 
-      {image && <div className="ImageSelection">
-        <img
-          alt="not found"
-          src={URL.createObjectURL(image)}
-          style={{
-            display: "block",          // Makes the image behave as a block-level element
-            margin: "0 auto",          // Centers the image horizontally
-            width: "500px",            // Adjusts the displayed width
-            height: "auto",            // Maintains the aspect ratio
-          }}
-        />
-      </div>}
+    {image && (
+        <div className="ImageSelection">
+          <img
+            alt="Selected"
+            src={URL.createObjectURL(image)}
+            style={{
+              display: 'block',
+              margin: '0 auto',
+              width: '500px',
+              height: 'auto',
+            }}
+          />
+        </div>
+      )}
+
+      {!image && triedSelecting &&(
+        <div className="ImageSelection">
+          <img
+            alt="Selected"
+            src={"/Images/104.5.png" }
+            style={{
+              display: 'block',
+              margin: '0 auto',
+              width: '500px',
+              height: 'auto',
+            }}
+          />
+        </div>
+      )}
 
       {fileUploaded && (
         <div className="csv-container">
           <div className="csvDownload">
             Download Result File for: {fileName}
-            <button onClick={() => downloadFile(fileName)}>Download</button>
+            <button onClick={() => downloadFile(fileName)}>Download & Process</button>
             {loading && <div> Processing Input... </div>}
           </div>
         </div>
       )}
 
-      {/* <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-      <div style={{ width: '50%' }}>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div> */}
 
       <div className="bar-graph-container">
-        {/* Render a bar chart for each row in the CSV */}
+
         {chartData.map((row, index) => (
           <div key={index} className="bar-graph">
-            <h2>{row.image_name}</h2> {/* Display the image name as the chart title */}
+            <h2>{row.image_name}</h2> 
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={[
                 { name: "None", value: row.None },
@@ -206,7 +221,7 @@ const FileUploader = () => {
                   <YAxis 
                     domain={[0, 1]} // Set the Y-axis to range from 0 to 1
                     label={{ value: "Confidence %", angle: -90, position: "insideLeft" }} 
-                    tickFormatter={(tick) => `${(tick * 100).toFixed(0)}%`} // Format Y values as percentages
+                    tickFormatter={(tick) => `${(tick * 100).toFixed(0)}%`} 
                   />
                   <Tooltip formatter={(value) => `${(value * 100).toFixed(0)}%`} />
                 <Bar dataKey="value" fill="#7A003C" />

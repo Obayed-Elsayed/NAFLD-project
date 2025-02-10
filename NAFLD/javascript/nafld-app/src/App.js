@@ -26,15 +26,14 @@ function App() {
   return (
     <div className="App">
       <header className="centered-header">
-          <img src="/Images/McMaster.png" alt="Logo Left" className="logo-left" />
-        <h1 className="centered-header">
-
-          FibroAi
-
-        </h1>
-          <img src="/Images/Heersink.png" alt="Logo Right" className="logo-right" />
+        <img src="/Images/McMaster.png" alt="Logo Left" className="logo" />
+        <img src="/Images/ICELAB.png" alt="Logo middle" className="logo" />
+        <img src="/Images/Heersink.png" alt="Logo Right" className="logo" />
         {/* <ImageSubmission /> */}
       </header>
+        <h1 className="centered-header">
+          FibroAi
+        </h1>
       <div>
         <FileUploader />
       </div>

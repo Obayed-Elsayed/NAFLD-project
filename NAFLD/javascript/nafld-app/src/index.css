@@ -12,9 +12,9 @@
   font-family: "poppins",Arial, Helvetica, sans-serif;
 }
 
-.centered-header h1 {
+.app h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 5rem;
   font-weight: bold;
 }
 * {
@@ -109,12 +109,12 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.5rem;
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
-h5 { font-size: 1rem; }
-h6 { font-size: 0.875rem; }
+h1 { font-size: 2.027rem; }
+h2 { font-size: 1.802rem; }
+h3 { font-size: 1.602rem; }
+h4 { font-size: 1.424rem; }
+h5 { font-size: 1.266rem; }
+h6 { font-size: 1.125rem; }
 
 /* Links */
 a {
@@ -263,4 +263,9 @@ form {
   flex-wrap: wrap;  /* Allow graphs to wrap to the next line if necessary */
   justify-content: space-between;  /* Distribute space evenly between the charts */
   width: 100%;  /* Ensure the container takes full width */
+}
+
+.logo {
+  width: 33%;  /* Ensure the container takes full width */
+  padding: 1rem 2rem;
 }
