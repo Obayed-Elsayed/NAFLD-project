@@ -182,11 +182,11 @@ const FileUploader = () => {
         <div className="ImageSelection">
           <img
             alt="Selected"
-            src={"/Images/104.5.png" }
+            src={"/Images/combined.png" }
             style={{
               display: 'block',
               margin: '0 auto',
-              width: '500px',
+              width: '1080px',
               height: 'auto',
             }}
           />

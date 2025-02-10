@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import ImageSubmission from "./ImageSubmission";
 import FileUploader from "./FileUploader";
-// TODO:
-// Test when file upload fails what happens
-// Test when result file download fails what happens
-// Refactor css file into multiple files depending on what class is using them
+
 function App() {
   const [data, setData] = useState({})
 
