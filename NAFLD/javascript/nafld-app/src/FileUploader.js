@@ -2,8 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import Resumable from 'resumablejs';
 import ProgressBar from './progressBar';
 import Papa from 'papaparse';
-// import { Bar } from 'react-chartjs-2';
-// import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const FileUploader = () => {
@@ -71,7 +69,7 @@ const FileUploader = () => {
       if (validImageExtensions.includes(`.${fileExtension}`)) {
         setSelectedImage(selectedFile);
       } else {
-        setSelectedImage(null); // Set to null if the file is not an image
+        setSelectedImage(null); 
       }
     }
 
@@ -79,9 +77,9 @@ const FileUploader = () => {
     resumableRef.current.addFiles(files);
   };
 
-  // Handle form submission
+ 
   const handleSubmit = (event) => {
-    event.preventDefault(); // Prevent default form submission and page refresh
+    event.preventDefault(); 
     setFileUploaded(false);
     if (filesSelected) {
       resumableRef.current.upload();
@@ -111,13 +109,13 @@ const FileUploader = () => {
             .split('filename=')[1]
             .replace(/"/g, '');
         }
-        // Create a temporary link element to trigger the download
+        // Create a temporary link to trigger the download
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', downloadfilename);
 
-        // Append the link to the body (necessary for some browsers)
+        // Append the link to the body
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -140,15 +138,16 @@ const FileUploader = () => {
     }
   };
 
+  //display results form backend
   const parseCSV = (csvText) => {
     Papa.parse(csvText, {
-      header: true, // Treat the first row as headers
+      header: true, 
       skipEmptyLines: true,
       complete: (result) => {
-        // Extract the data rows
+        
         const data = result.data.map(row => ({
-          image_name: row.image_name,  // The image name will be the title
-          None: JSON.parse(row.None),  // Parse the array values
+          image_name: row.image_name,  
+          None: JSON.parse(row.None),  
           Perisinusoidal: JSON.parse(row.Perisinusoidal),
           Bridging: JSON.parse(row.Bridging),
           Cirrosis: JSON.parse(row.Cirrosis),
@@ -163,6 +162,7 @@ const FileUploader = () => {
 
     <div className="ImageSubmission">
 
+    {/*  requires some redundancy removal, can do this in one go */}
     {image && (
         <div className="ImageSelection">
           <img
